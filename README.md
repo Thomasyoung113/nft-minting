@@ -99,4 +99,4 @@
 </script>
 
 </body>
-</html># nft-minting
+</html>#
