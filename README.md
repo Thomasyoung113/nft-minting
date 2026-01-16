@@ -48,8 +48,6 @@
             margin-bottom: 1rem;
         }
 
-        .desc { font-size: 0.7rem; color: #888; margin-bottom: 2rem; line-height: 1.4; }
-
         button {
             background: linear-gradient(135deg, var(--secondary), var(--primary));
             border: none;
@@ -70,23 +68,22 @@
         }
 
         #feedback { margin-top: 20px; font-size: 0.8rem; min-height: 40px;}
-        .address-link { color: var(--primary); font-family: monospace; font-size: 0.7rem; word-break: break-all; }
         #status { font-size: 0.6rem; color: #444; margin-top: 1.5rem; letter-spacing: 2px; text-transform: uppercase;}
         .error { color: #ff0055; font-size: 0.7rem; }
+        .success-link { color: var(--primary); font-family: monospace; font-size: 0.7rem; word-break: break-all; text-decoration: none; }
     </style>
 </head>
 <body>
 
 <div class="card">
     <h1>ATOMIC MINT</h1>
-    <p class="desc">Each click spawns a unique, fresh NFT contract on Tempo Moderato.</p>
     
     <div id="authUI">
-        <button id="connectBtn">Initialize Link</button>
+        <button id="connectBtn">INITIALIZE LINK</button>
     </div>
 
     <div id="mintUI" style="display: none;">
-        <button id="deployBtn">Execute Neural Launch</button>
+        <button id="deployBtn">EXECUTE NEURAL LAUNCH</button>
     </div>
 
     <div id="feedback"></div>
@@ -98,94 +95,27 @@
 
     let provider, signer;
     
-    // Updated based on your Rabby Error Screen
-    const chainIdDecimal = 1953;
-    const moderatoHex = "0x7A1"; // Hex for 1953
-    const rpc = "https://rpc.testnet.tempo.xyz"; // Standard endpoint
+    // Aligned to Tempo Moderato
+    const moderatoHex = "0x7A1"; // Chain ID 1953
+    const rpc = "https://rpc.moderato.testnet.tempo.xyz"; 
     const explorer = "https://explore.tempo.xyz";
 
-    // Minimal ERC721 Proxy Bytecode
+    // Minimal NFT Bytecode for fresh deployment
     const BYTECODE = "0x608060405234801561001057600080fd5b5061012b806100206000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80634f6d7ef314602d575b600080fd5b60336047565b6040518082815260200191505060405180910390f35b6000600190509056fea2646970667358221220ec7b274c4249a62292f7e8006e8e5f73906a77d3202951f2f01f440590a931a764736f6c63430008120033"; 
     const ABI = ["constructor()"];
 
     async function connect() {
         const feedback = document.getElementById('feedback');
-        const status = document.getElementById('status');
-        
-        if (!window.ethereum) {
-            feedback.innerHTML = "<span class='error'>Rabby Wallet not detected.</span>";
-            return;
-        }
+        if (!window.ethereum) return feedback.innerHTML = "<span class='error'>No Wallet Detected</span>";
 
         try {
-            provider = new ethers.BrowserProvider(window.ethereum);
+            feedback.innerHTML = "Syncing Moderato Network...";
             
-            // Force Rabby to add/switch the network
-            feedback.innerHTML = "Requesting Network Sync...";
-            try {
-                await window.ethereum.request({
-                    method: 'wallet_addEthereumChain',
-                    params: [{
-                        chainId: moderatoHex,
-                        chainName: 'Tempo Moderato',
-                        rpcUrls: [rpc],
-                        nativeCurrency: { name: 'TEMPO', symbol: 'TEMPO', decimals: 18 },
-                        blockExplorerUrls: [explorer]
-                    }]
-                });
-            } catch (rpcErr) {
-                console.warn("Network switch failed, likely already added.");
-            }
-
-            await provider.send("eth_requestAccounts", []);
-            signer = await provider.getSigner();
-            const addr = await signer.getAddress();
-            
-            document.getElementById('authUI').style.display = 'none';
-            document.getElementById('mintUI').style.display = 'block';
-            status.innerText = `TUNNEL ACTIVE // ${addr.slice(0,10)}...`;
-            feedback.innerHTML = "";
-            
-        } catch (err) {
-            console.error(err);
-            feedback.innerHTML = `<span class='error'>Link Failed: ${err.message.slice(0, 50)}...</span>`;
-        }
-    }
-
-    async function deployAsMint() {
-        const feedback = document.getElementById('feedback');
-        feedback.innerHTML = "Generating Atomic Contract...";
-
-        try {
-            const factory = new ethers.ContractFactory(ABI, BYTECODE, signer);
-            
-            feedback.innerHTML = "Awaiting Neural Signature...";
-            const contract = await factory.deploy();
-            
-            feedback.innerHTML = "Broadcasting to Moderato...";
-            await contract.waitForDeployment();
-            
-            const newAddress = await contract.getAddress();
-            
-            feedback.innerHTML = `
-                <div style="color: var(--primary); margin-bottom: 5px;">SUCCESS: FRESH CONTRACT SPAWNED</div>
-                <a href="${explorer}/address/${newAddress}" target="_blank" class="address-link">${newAddress}</a>
-            `;
-        } catch (err) {
-            console.error(err);
-            feedback.innerHTML = "<span class='error'>Deployment Interrupted.</span>";
-        }
-    }
-
-    document.getElementById('connectBtn').onclick = connect;
-    document.getElementById('deployBtn').onclick = deployAsMint;
-
-    // Handle network/account changes
-    if (window.ethereum) {
-        window.ethereum.on('chainChanged', () => window.location.reload());
-        window.ethereum.on('accountsChanged', () => window.location.reload());
-    }
-</script>
-
-</body>
-</html>
+            // Add/Switch to the Moderato network
+            await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [{
+                    chainId: moderatoHex,
+                    chainName: 'Tempo Moderato',
+                    rpcUrls: [rpc],
+                    nativeCurrency: {
