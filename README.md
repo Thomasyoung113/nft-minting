@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TEMPO // MODERATO MINT</title>
+    <title>TEMPO // NEURAL MINT</title>
     <style>
         :root {
             --primary: #00f2ff;
             --secondary: #7000ff;
             --bg: #050505;
-            --card-bg: rgba(20, 20, 25, 0.9);
+            --card-bg: rgba(20, 20, 25, 0.95);
         }
 
         body {
@@ -25,39 +25,39 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
         .glow {
             position: absolute;
-            width: 400px;
-            height: 400px;
+            width: 450px;
+            height: 450px;
             background: var(--secondary);
-            filter: blur(150px);
-            opacity: 0.2;
+            filter: blur(140px);
+            opacity: 0.15;
             z-index: -1;
-            animation: move 15s infinite alternate;
+            animation: pulse 8s infinite alternate;
         }
 
-        @keyframes move {
-            from { transform: translate(-30%, -30%); }
-            to { transform: translate(30%, 30%); }
+        @keyframes pulse {
+            from { transform: scale(1); opacity: 0.1; }
+            to { transform: scale(1.2); opacity: 0.2; }
         }
 
         .card {
             background: var(--card-bg);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(0, 242, 255, 0.2);
-            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 242, 255, 0.15);
+            border-radius: 28px;
             padding: 2.5rem;
-            width: 400px;
+            width: 380px;
             text-align: center;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.8);
         }
 
         h1 {
-            font-size: 1.6rem;
-            letter-spacing: 5px;
+            font-size: 1.5rem;
+            letter-spacing: 6px;
             margin-bottom: 0.5rem;
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
@@ -67,78 +67,90 @@
 
         .network-tag {
             display: inline-block;
-            font-size: 0.65rem;
-            background: rgba(0, 242, 255, 0.1);
+            font-size: 0.6rem;
+            background: rgba(0, 242, 255, 0.05);
             color: var(--primary);
-            padding: 5px 15px;
+            padding: 6px 16px;
             border-radius: 100px;
-            border: 1px solid var(--primary);
-            margin-bottom: 1.5rem;
-            text-transform: uppercase;
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            margin-bottom: 2rem;
+            letter-spacing: 2px;
         }
 
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 1.5rem;
+            gap: 12px;
+            margin-bottom: 2rem;
         }
 
         .stat-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 12px;
-            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 15px 10px;
+            border-radius: 16px;
         }
 
-        .stat-label { font-size: 0.55rem; color: #888; text-transform: uppercase; display: block; margin-bottom: 4px; }
-        .stat-value { font-size: 1.1rem; font-weight: bold; color: #fff; }
+        .stat-label { font-size: 0.5rem; color: #666; text-transform: uppercase; display: block; margin-bottom: 5px; }
+        .stat-value { font-size: 1.1rem; font-weight: bold; font-family: monospace; }
 
         input {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(0, 242, 255, 0.3);
-            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--primary);
             padding: 12px;
-            border-radius: 8px;
-            width: 80px;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
+            border-radius: 12px;
+            width: 100px;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
             text-align: center;
             outline: none;
+            transition: border 0.3s;
         }
 
+        input:focus { border-color: var(--primary); }
+
         button {
-            background: linear-gradient(45deg, var(--secondary), var(--primary));
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
             border: none;
             color: white;
-            padding: 16px;
-            border-radius: 12px;
+            padding: 18px;
+            border-radius: 14px;
             width: 100%;
-            font-weight: bold;
+            font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
         }
 
         button:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.5);
+            transform: translateY(-2px);
         }
 
         #txHistory {
-            margin-top: 1.5rem;
+            margin-top: 2rem;
             text-align: left;
-            font-size: 0.7rem;
-            max-height: 100px;
+            max-height: 120px;
             overflow-y: auto;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 15px;
         }
 
-        .tx-item { color: #888; margin-bottom: 5px; font-family: monospace; }
-        .success-msg { color: var(--primary); font-weight: bold; }
-        #status { font-size: 0.7rem; color: #555; margin-top: 1rem; }
+        .tx-item { 
+            font-size: 0.65rem; 
+            margin-bottom: 8px; 
+            font-family: monospace; 
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .tx-link { color: var(--primary); text-decoration: none; opacity: 0.7; }
+        .tx-link:hover { opacity: 1; text-decoration: underline; }
+
+        #status { font-size: 0.65rem; color: #444; margin-top: 1.5rem; font-family: monospace; }
+        .success-msg { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
     </style>
 </head>
 <body>
@@ -146,30 +158,30 @@
 <div class="glow"></div>
 
 <div class="card">
-    <h1>NEURAL MINT</h1>
-    <div class="network-tag">● MODERATO TESTNET</div>
+    <h1>TEMPO MINT</h1>
+    <div class="network-tag">MODERATO v2.0</div>
     
     <div id="statsUI" class="stats-grid" style="display: none;">
         <div class="stat-card">
             <span class="stat-label">Global Supply</span>
-            <span id="totalSupply" class="stat-value">--</span>
+            <span id="totalSupply" class="stat-value">0</span>
         </div>
         <div class="stat-card">
             <span class="stat-label">Your Wallet</span>
-            <span id="userBalance" class="stat-value">--</span>
+            <span id="userBalance" class="stat-value">0</span>
         </div>
     </div>
 
-    <button id="connectBtn">Connect Neural Link</button>
+    <button id="connectBtn">Link Neural Interface</button>
 
     <div id="mintUI" style="display: none;">
         <input type="number" id="qty" value="1" min="1">
-        <button id="mintBtn">Authorize Mint</button>
+        <button id="mintBtn">Execute Mint</button>
         <div id="txHistory"></div>
     </div>
 
-    <div id="feedback" style="margin-top: 15px; font-size: 0.85rem;"></div>
-    <p id="status">Status: Offline</p>
+    <div id="feedback" style="margin-top: 15px; font-size: 0.8rem;"></div>
+    <p id="status">STATUS // OFFLINE</p>
 </div>
 
 <script type="module">
@@ -177,10 +189,11 @@
 
     let provider, signer, contract, userAddress;
     
-    // Config for Tempo Moderato
+    // Moderato Details
     const contractAddress = "0xD84465DC85e23f18dC60a5975b4562d6a5B6DcbB";
-    const moderatoChainId = "0x7A1"; 
-    const moderatoRpc = "https://rpc.moderato.testnet.tempo.xyz";
+    const moderatoHex = "0x7A1"; 
+    const rpc = "https://rpc.moderato.testnet.tempo.xyz";
+    const explorer = "https://explorer.moderato.testnet.tempo.xyz";
 
     const abi = [
         "function mint(uint256 quantity) public",
@@ -188,12 +201,15 @@
         "function balanceOf(address owner) view returns (uint256)"
     ];
 
-    function logTx(hash) {
+    function addTxToUI(hash) {
         const history = document.getElementById('txHistory');
-        const entry = document.createElement('div');
-        entry.className = 'tx-item';
-        entry.innerHTML = `> TX: ${hash.slice(0,10)}...${hash.slice(-8)}`;
-        history.prepend(entry);
+        const item = document.createElement('div');
+        item.className = 'tx-item';
+        item.innerHTML = `
+            <span>> TX: ${hash.slice(0,6)}...${hash.slice(-4)}</span>
+            <a href="${explorer}/tx/${hash}" target="_blank" class="tx-link">[VIEW]</a>
+        `;
+        history.prepend(item);
     }
 
     async function updateStats() {
@@ -205,30 +221,30 @@
             document.getElementById('totalSupply').innerText = total.toString();
             document.getElementById('userBalance').innerText = balance.toString();
             document.getElementById('statsUI').style.display = 'grid';
-        } catch (e) { console.error("Sync Error:", e); }
+        } catch (e) { console.log("Stats sync error"); }
     }
 
     async function connect() {
-        if (!window.ethereum) return alert("Rabby Wallet required for Neural Link.");
+        if (!window.ethereum) return alert("Neural Link: Rabby Wallet not detected.");
         
         try {
             provider = new ethers.BrowserProvider(window.ethereum);
             
-            // Network Switch/Add Logic
             try {
                 await window.ethereum.request({
                     method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: moderatoChainId }],
+                    params: [{ chainId: moderatoHex }],
                 });
             } catch (err) {
                 if (err.code === 4902) {
                     await window.ethereum.request({
                         method: 'wallet_addEthereumChain',
                         params: [{
-                            chainId: moderatoChainId,
+                            chainId: moderatoHex,
                             chainName: 'Tempo Moderato',
-                            rpcUrls: [moderatoRpc],
-                            nativeCurrency: { name: 'TEMPO', symbol: 'TEMPO', decimals: 18 }
+                            rpcUrls: [rpc],
+                            nativeCurrency: { name: 'TEMPO', symbol: 'TEMPO', decimals: 18 },
+                            blockExplorerUrls: [explorer]
                         }]
                     });
                 }
@@ -241,7 +257,7 @@
             
             await updateStats();
             
-            document.getElementById('status').innerText = `Active: ${userAddress.slice(0,6)}...${userAddress.slice(-4)}`;
+            document.getElementById('status').innerText = `TUNNEL // ${userAddress.toUpperCase()}`;
             document.getElementById('connectBtn').style.display = 'none';
             document.getElementById('mintUI').style.display = 'block';
             
@@ -252,21 +268,20 @@
         const qty = document.getElementById('qty').value;
         const feedback = document.getElementById('feedback');
         try {
-            feedback.innerHTML = "Submitting to Moderato...";
+            feedback.innerHTML = "Authenticating Signal...";
             const tx = await contract.mint(qty);
             
-            feedback.innerHTML = "Processing Neural Print...";
-            logTx(tx.hash);
+            feedback.innerHTML = "Broadcasting to Moderato...";
+            addTxToUI(tx.hash);
             
             await tx.wait();
             await updateStats();
-            feedback.innerHTML = `<span class="success-msg">Mint Confirmed.</span>`;
+            feedback.innerHTML = `<span class="success-msg">Neural Print Success.</span>`;
         } catch (err) {
-            feedback.innerHTML = `<span style="color:#ff0055">Authorization Failed.</span>`;
+            feedback.innerHTML = `<span style="color:#ff0055">Signal Interrupted.</span>`;
         }
     }
 
-    // Auto-refresh on wallet changes
     if (window.ethereum) {
         window.ethereum.on('accountsChanged', () => window.location.reload());
         window.ethereum.on('chainChanged', () => window.location.reload());
