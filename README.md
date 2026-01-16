@@ -94,14 +94,19 @@
         .stat-label { font-size: 0.5rem; color: #666; text-transform: uppercase; display: block; margin-bottom: 5px; }
         .stat-value { font-size: 1.1rem; font-weight: bold; font-family: monospace; }
 
+        .input-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
         input {
             background: rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--primary);
-            padding: 12px;
+            padding: 12px 20px;
             border-radius: 12px;
-            width: 100px;
-            margin-bottom: 20px;
+            width: 120px;
             font-size: 1.3rem;
             text-align: center;
             outline: none;
@@ -144,13 +149,25 @@
             font-family: monospace; 
             display: flex;
             justify-content: space-between;
+            background: rgba(255,255,255,0.02);
+            padding: 5px;
+            border-radius: 4px;
         }
 
-        .tx-link { color: var(--primary); text-decoration: none; opacity: 0.7; }
+        .tx-link { color: var(--primary); text-decoration: none; opacity: 0.7; font-weight: bold; }
         .tx-link:hover { opacity: 1; text-decoration: underline; }
 
-        #status { font-size: 0.65rem; color: #444; margin-top: 1.5rem; font-family: monospace; }
-        .success-msg { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+        #status { 
+            font-size: 0.6rem; 
+            color: #444; 
+            margin-top: 1.5rem; 
+            font-family: monospace; 
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        #status:hover { color: var(--primary); }
+
+        .success-msg { color: var(--primary); text-shadow: 0 0 10px var(--primary); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -159,7 +176,7 @@
 
 <div class="card">
     <h1>TEMPO MINT</h1>
-    <div class="network-tag">MODERATO v2.0</div>
+    <div class="network-tag">MODERATO TESTNET</div>
     
     <div id="statsUI" class="stats-grid" style="display: none;">
         <div class="stat-card">
@@ -167,7 +184,7 @@
             <span id="totalSupply" class="stat-value">0</span>
         </div>
         <div class="stat-card">
-            <span class="stat-label">Your Wallet</span>
+            <span class="stat-label">Your Balance</span>
             <span id="userBalance" class="stat-value">0</span>
         </div>
     </div>
@@ -175,13 +192,15 @@
     <button id="connectBtn">Link Neural Interface</button>
 
     <div id="mintUI" style="display: none;">
-        <input type="number" id="qty" value="1" min="1">
+        <div class="input-container">
+            <input type="number" id="qty" value="1" min="1">
+        </div>
         <button id="mintBtn">Execute Mint</button>
         <div id="txHistory"></div>
     </div>
 
-    <div id="feedback" style="margin-top: 15px; font-size: 0.8rem;"></div>
-    <p id="status">STATUS // OFFLINE</p>
+    <div id="feedback" style="margin-top: 15px; font-size: 0.8rem; min-height: 1.2rem;"></div>
+    <p id="status" title="Click to copy address">SIGNAL // OFFLINE</p>
 </div>
 
 <script type="module">
@@ -189,11 +208,11 @@
 
     let provider, signer, contract, userAddress;
     
-    // Moderato Details
+    // Moderato Build Config
     const contractAddress = "0xD84465DC85e23f18dC60a5975b4562d6a5B6DcbB";
     const moderatoHex = "0x7A1"; 
     const rpc = "https://rpc.moderato.testnet.tempo.xyz";
-    const explorer = "https://explorer.moderato.testnet.tempo.xyz";
+    const explorer = "https://explore.tempo.xyz"; // Updated explorer link
 
     const abi = [
         "function mint(uint256 quantity) public",
@@ -206,13 +225,14 @@
         const item = document.createElement('div');
         item.className = 'tx-item';
         item.innerHTML = `
-            <span>> TX: ${hash.slice(0,6)}...${hash.slice(-4)}</span>
-            <a href="${explorer}/tx/${hash}" target="_blank" class="tx-link">[VIEW]</a>
+            <span>> HASH: ${hash.slice(0,6)}...${hash.slice(-4)}</span>
+            <a href="${explorer}/tx/${hash}" target="_blank" class="tx-link">[EXPLORE]</a>
         `;
         history.prepend(item);
     }
 
     async function updateStats() {
+        if (!contract) return;
         try {
             const [total, balance] = await Promise.all([
                 contract.totalSupply(),
@@ -221,11 +241,11 @@
             document.getElementById('totalSupply').innerText = total.toString();
             document.getElementById('userBalance').innerText = balance.toString();
             document.getElementById('statsUI').style.display = 'grid';
-        } catch (e) { console.log("Stats sync error"); }
+        } catch (e) { console.warn("Stats sync error - node might be rate limiting."); }
     }
 
     async function connect() {
-        if (!window.ethereum) return alert("Neural Link: Rabby Wallet not detected.");
+        if (!window.ethereum) return alert("Neural Link: Wallet not detected. Please install Rabby.");
         
         try {
             provider = new ethers.BrowserProvider(window.ethereum);
@@ -257,16 +277,18 @@
             
             await updateStats();
             
-            document.getElementById('status').innerText = `TUNNEL // ${userAddress.toUpperCase()}`;
+            document.getElementById('status').innerText = `TUNNEL // ${userAddress.slice(0,6)}...${userAddress.slice(-4)}`;
             document.getElementById('connectBtn').style.display = 'none';
             document.getElementById('mintUI').style.display = 'block';
             
-        } catch (err) { console.error(err); }
+        } catch (err) { console.error("Connection failed", err); }
     }
 
     async function mint() {
         const qty = document.getElementById('qty').value;
         const feedback = document.getElementById('feedback');
+        if (qty < 1) return;
+
         try {
             feedback.innerHTML = "Authenticating Signal...";
             const tx = await contract.mint(qty);
@@ -276,11 +298,22 @@
             
             await tx.wait();
             await updateStats();
-            feedback.innerHTML = `<span class="success-msg">Neural Print Success.</span>`;
+            feedback.innerHTML = `<span class="success-msg">Neural Print Confirmed.</span>`;
         } catch (err) {
+            console.error(err);
             feedback.innerHTML = `<span style="color:#ff0055">Signal Interrupted.</span>`;
         }
     }
+
+    // Copy Address Logic
+    document.getElementById('status').onclick = () => {
+        if (userAddress) {
+            navigator.clipboard.writeText(userAddress);
+            const oldText = document.getElementById('status').innerText;
+            document.getElementById('status').innerText = "COPIED TO CLIPBOARD";
+            setTimeout(() => document.getElementById('status').innerText = oldText, 2000);
+        }
+    };
 
     if (window.ethereum) {
         window.ethereum.on('accountsChanged', () => window.location.reload());
