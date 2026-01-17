@@ -3,27 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TEMPO // ATOMIC v4</title>
+    <title>TEMPO // MODERATO 42431</title>
     <style>
         :root { --primary: #00f2ff; --secondary: #7000ff; --bg: #050505; }
         body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
         .card { background: rgba(20, 20, 25, 0.95); border: 1px solid rgba(0, 242, 255, 0.2); border-radius: 28px; padding: 2.5rem; width: 380px; text-align: center; box-shadow: 0 0 50px rgba(112, 0, 255, 0.2); }
         h1 { font-size: 1.4rem; letter-spacing: 4px; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; margin-bottom: 2rem; }
-        button { background: linear-gradient(135deg, var(--secondary), var(--primary)); border: none; color: white; padding: 20px; border-radius: 14px; width: 100%; font-weight: 900; text-transform: uppercase; cursor: pointer; }
+        button { background: linear-gradient(135deg, var(--secondary), var(--primary)); border: none; color: white; padding: 18px; border-radius: 12px; width: 100%; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
         #feedback { margin-top: 20px; font-size: 0.8rem; color: var(--primary); min-height: 50px; }
-        .history-item { background: rgba(255,255,255,0.05); padding: 8px; margin-top: 5px; border-radius: 5px; font-size: 0.7rem; font-family: monospace; display: flex; justify-content: space-between; }
+        .history-item { background: rgba(255,255,255,0.05); padding: 8px; margin-top: 6px; border-radius: 6px; font-size: 0.65rem; font-family: monospace; display: flex; justify-content: space-between; align-items: center; }
+        #status { font-size: 0.6rem; color: #555; margin-top: 1.5rem; letter-spacing: 2px; }
     </style>
 </head>
 <body>
 
 <div class="card">
     <h1>ATOMIC MINT</h1>
-    <div id="ui">
-        <button id="mainBtn">INITIALIZE LINK</button>
-    </div>
+    <div id="ui"><button id="mainBtn">INITIALIZE LINK</button></div>
     <div id="feedback"></div>
     <div id="history" style="margin-top: 20px; text-align: left;"></div>
-    <p id="status" style="font-size: 0.6rem; color: #444; margin-top: 1.5rem;">STATUS: OFFLINE</p>
+    <p id="status">STATUS: DISCONNECTED (CHAIN 42431)</p>
 </div>
 
 <script type="module">
@@ -31,12 +31,10 @@
 
     let provider, signer, state = "CONNECT";
     
-    // We try multiple known Tempo RPCs
-    const RPCS = [
-        "https://rpc.moderato.testnet.tempo.xyz",
-        "https://rpc.testnet.tempo.xyz",
-        "https://tempo-testnet.rpc.thirdweb.com"
-    ];
+    // NEW TEMPO MODERATO SPECS
+    const CHAIN_ID_HEX = "0xA5BF"; // 42431
+    const RPC_URL = "https://rpc.moderato.tempo.xyz"; 
+    const EXPLORER = "https://explore.tempo.xyz";
 
     async function handleAction() {
         const feedback = document.getElementById('feedback');
@@ -44,18 +42,18 @@
 
         if (state === "CONNECT") {
             try {
-                feedback.innerHTML = "Connecting to Rabby...";
-                if (!window.ethereum) throw new Error("Rabby not found");
+                feedback.innerHTML = "Requesting Neural Sync (42431)...";
+                if (!window.ethereum) throw new Error("Rabby/MetaMask not found.");
 
-                // Try to add the network
+                // Switch or Add the new Chain 42431
                 await window.ethereum.request({
                     method: 'wallet_addEthereumChain',
                     params: [{
-                        chainId: "0x7A1", // 1953
+                        chainId: CHAIN_ID_HEX,
                         chainName: 'Tempo Moderato',
-                        rpcUrls: RPCS,
-                        nativeCurrency: { name: 'TEMPO', symbol: 'TEMPO', decimals: 18 },
-                        blockExplorerUrls: ["https://explore.tempo.xyz"]
+                        rpcUrls: [RPC_URL],
+                        nativeCurrency: { name: 'TEMPO', symbol: 'USD', decimals: 18 },
+                        blockExplorerUrls: [EXPLORER]
                     }]
                 });
 
@@ -65,31 +63,40 @@
                 
                 state = "MINT";
                 btn.innerText = "EXECUTE NEURAL LAUNCH";
-                document.getElementById('status').innerText = "STATUS: ACTIVE";
-                feedback.innerHTML = "Linked Successfully.";
+                document.getElementById('status').innerText = "STATUS: ACTIVE // CHAIN 42431";
+                feedback.innerHTML = "Link Established Successfully.";
             } catch (e) {
-                feedback.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
+                alert("Connection Error: " + e.message);
+                feedback.innerHTML = `<span style="color:red">Link Failed.</span>`;
             }
         } else {
             try {
-                feedback.innerHTML = "Deploying fresh contract...";
+                btn.disabled = true;
+                feedback.innerHTML = "Broadcasting Atomic Contract...";
+                
                 const ABI = ["constructor()"];
                 const BYTECODE = "0x608060405234801561001057600080fd5b5061012b806100206000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80634f6d7ef314602d575b600080fd5b60336047565b6040518082815260200191505060405180910390f35b6000600190509056fea2646970667358221220ec7b274c4249a62292f7e8006e8e5f73906a77d3202951f2f01f440590a931a764736f6c63430008120033";
                 
                 const factory = new ethers.ContractFactory(ABI, BYTECODE, signer);
                 const contract = await factory.deploy();
-                feedback.innerHTML = "Awaiting block confirmation...";
+                
+                feedback.innerHTML = "Finalizing Deployment...";
                 await contract.waitForDeployment();
                 
                 const addr = await contract.getAddress();
-                feedback.innerHTML = "Deployment Success!";
+                feedback.innerHTML = `<span style="color:#00f2ff">Print Success!</span>`;
                 
+                // Add to visible history list
                 const item = document.createElement('div');
                 item.className = 'history-item';
-                item.innerHTML = `<span>${addr.slice(0,10)}...</span><a href="https://explore.tempo.xyz/address/${addr}" target="_blank" style="color:#00f2ff">VIEW</a>`;
-                document.getElementById('history').appendChild(item);
+                item.innerHTML = `<span>${addr.slice(0,12)}...</span><a href="${EXPLORER}/address/${addr}" target="_blank" style="color:var(--primary); text-decoration:none;">[EXPLORER]</a>`;
+                document.getElementById('history').prepend(item);
+                
             } catch (e) {
-                feedback.innerHTML = `<span style="color:red">Deploy Failed: ${e.message.slice(0,40)}</span>`;
+                alert("Deployment Error: " + e.message);
+                feedback.innerHTML = `<span style="color:red">Launch Interrupted.</span>`;
+            } finally {
+                btn.disabled = false;
             }
         }
     }
