@@ -2,18 +2,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TEMPO // AJEH ATOMIC V20</title>
+    <title>TEMPO // AJEH ATOMIC V21</title>
     <style>
         :root { --primary: #00f2ff; --bg: #050505; --card: #0d0d0d; --accent: #ff0055; }
         body { 
             background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; 
-            margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh;
         }
         
         .main-card {
             background: var(--card); border: 1px solid #1a1a1a; border-radius: 24px;
             padding: 40px; width: 100%; max-width: 420px; text-align: center;
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
         }
 
         .header-box { margin-bottom: 25px; }
@@ -23,7 +24,7 @@
         .nav-btn { 
             background: #111; border: 1px solid #222; color: #888; 
             padding: 12px; border-radius: 10px; font-size: 0.6rem; cursor: pointer;
-            text-decoration: none; font-weight: bold; transition: 0.2s;
+            text-decoration: none; font-weight: bold; transition: 0.2s; text-align: center;
         }
         .nav-btn:hover { border-color: var(--primary); color: #fff; }
         .refuel-btn { border-color: var(--accent); color: var(--accent); }
@@ -44,6 +45,17 @@
         #history { margin-top: 20px; font-size: 0.6rem; color: #444; max-height: 100px; overflow-y: auto; text-align: left; border-top: 1px solid #161616; padding-top: 10px; }
         .history-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #111; }
         .history-item a { color: var(--primary); text-decoration: none; }
+
+        /* Footer Note Style */
+        .footer-note { 
+            font-size: 0.65rem; color: #333; letter-spacing: 2px; text-transform: uppercase; font-weight: bold; 
+        }
+        .footer-note a { 
+            color: #555; text-decoration: none; transition: 0.3s; 
+        }
+        .footer-note a:hover { 
+            color: var(--primary); text-shadow: 0 0 8px var(--primary); 
+        }
     </style>
 </head>
 <body>
@@ -75,18 +87,20 @@
     <div id="history"></div>
 </div>
 
+<div class="footer-note">
+    Built By <a href="https://t.me/thomas_young" target="_blank">THOMASYOUNG</a>
+</div>
+
 <script type="module">
     import { ethers } from "https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.min.js";
 
     let provider, signer, address, state = "CONNECT";
     const EXPLORER_URL = "https://explore.tempo.xyz";
-    
-    // Faucet System Addresses
     const ASSETS = [
-        "0x20c0000000000000000000000000000000000000", // pathUSD
-        "0x20c0000000000000000000000000000000000001", // AlphaUSD
-        "0x20c0000000000000000000000000000000000002", // BetaUSD
-        "0x20c0000000000000000000000000000000000003"  // ThetaUSD
+        "0x20c0000000000000000000000000000000000000", 
+        "0x20c0000000000000000000000000000000000001", 
+        "0x20c0000000000000000000000000000000000002", 
+        "0x20c0000000000000000000000000000000000003"
     ];
 
     async function init() {
@@ -112,8 +126,7 @@
                 const tx = { to: asset, value: 0 };
                 const response = await signer.sendTransaction(tx);
                 await response.wait();
-                document.getElementById('feedback').innerText = `REFUELED: ${asset.slice(0,6)}...`;
-            } catch (e) { console.log("Refuel skipped/rejected"); }
+            } catch (e) { console.log("Refuel attempt failed"); }
         }
         updateStats();
         document.getElementById('feedback').innerText = "REFUEL SEQUENCE DONE";
@@ -132,19 +145,31 @@
         const count = parseInt(document.getElementById('mintCount').value);
         const btn = document.getElementById('mainBtn');
         btn.disabled = true;
+        
         for(let i=0; i<count; i++) {
-            try {
-                document.getElementById('feedback').innerText = `BURSTING ${i+1}/${count}...`;
-                const factory = new ethers.ContractFactory([], "0x608060405234801561001057600080fd5b5061012b806100206000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80634f6d7ef314602d575b600080fd5b60336047565b6040518082815260200191505060405180910390f35b6000600190509056fea2646970667358221220ec7b274c4249a62292f7e8006e8e5f73906a77d3202951f2f01f440590a931a764736f6c63430008120033", signer);
-                const tx = await factory.deploy();
-                await tx.waitForDeployment();
-                const addr = await tx.getAddress();
-                const item = document.createElement('div');
-                item.className = 'history-item';
-                item.innerHTML = `<span>#${i+1} SUCCESS</span> <a href="${EXPLORER_URL}/address/${addr}" target="_blank">EXPLORER</a>`;
-                document.getElementById('history').prepend(item);
-                updateStats();
-            } catch (e) { break; }
+            let attempt = 0;
+            let success = false;
+            
+            while(attempt < 3 && !success) {
+                try {
+                    document.getElementById('feedback').innerText = `BURSTING ${i+1}/${count} (Try ${attempt+1})...`;
+                    const factory = new ethers.ContractFactory([], "0x608060405234801561001057600080fd5b5061012b806100206000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80634f6d7ef314602d575b600080fd5b60336047565b6040518082815260200191505060405180910390f35b6000600190509056fea2646970667358221220ec7b274c4249a62292f7e8006e8e5f73906a77d3202951f2f01f440590a931a764736f6c63430008120033", signer);
+                    const tx = await factory.deploy();
+                    await tx.waitForDeployment();
+                    
+                    const addr = await tx.getAddress();
+                    const item = document.createElement('div');
+                    item.className = 'history-item';
+                    item.innerHTML = `<span>#${i+1} OK</span> <a href="${EXPLORER_URL}/address/${addr}" target="_blank">VIEW</a>`;
+                    document.getElementById('history').prepend(item);
+                    success = true;
+                } catch (e) {
+                    attempt++;
+                    if(attempt >= 3) break;
+                    await new Promise(r => setTimeout(r, 2000)); // Wait 2s before retry
+                }
+            }
+            updateStats();
         }
         btn.disabled = false;
         document.getElementById('feedback').innerText = "SEQUENCE COMPLETE";
